@@ -1,8 +1,8 @@
 """数据库基础模型"""
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declared_attr
+from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import os
 
@@ -43,13 +43,11 @@ class User(BaseModel):
 
 def get_engine():
     database_url = os.getenv('DATABASE_URL', 'postgresql+asyncpg://autoscholar:autoscholar@localhost:5432/autoscholar')
-    return create_async_engine(database_url)
+    return create_async_engine(database_url, echo=False)
 
 async def init_db():
+    """初始化数据库表"""
     engine = get_engine()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     await engine.dispose()
-    return engine
-
-print("✅ 数据库模型已创建")

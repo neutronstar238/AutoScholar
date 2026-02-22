@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "qwen2.5:7b"
     
     # ===== 前端配置 =====
-    FRONTEND_URL: str = "http://localhost:3000"
+    FRONTEND_URL: str = "http://localhost:5173"
     
     # ===== 平台集成配置 =====
     # 飞书

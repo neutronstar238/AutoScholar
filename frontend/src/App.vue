@@ -2,17 +2,18 @@
   <div id="autoscholar">
     <el-container>
       <el-header>
-        <h1>🚀 AutoScholar</h1>
-        <p>自主学术研究 AI Agent 系统</p>
+        <div class="header-content">
+          <h1>🚀 AutoScholar</h1>
+          <el-menu mode="horizontal" :default-active="$route.path" router>
+            <el-menu-item index="/">文献检索</el-menu-item>
+            <el-menu-item index="/notes">研究笔记</el-menu-item>
+            <el-menu-item index="/research">研究方向</el-menu-item>
+            <el-menu-item index="/user">用户中心</el-menu-item>
+          </el-menu>
+        </div>
       </el-header>
       <el-main>
-        <el-card>
-          <template #header>
-            <span>欢迎使用 AutoScholar</span>
-          </template>
-          <p>正在开发中... 敬请期待！</p>
-          <el-progress :percentage="40" status="active"></el-progress>
-        </el-card>
+        <router-view />
       </el-main>
     </el-container>
   </div>
@@ -27,14 +28,42 @@ export default {
 <style>
 #autoscholar {
   font-family: Arial, sans-serif;
+  height: 100vh;
+}
+.el-container {
+  height: 100%;
 }
 .el-header {
   background-color: #409EFF;
   color: white;
-  text-align: center;
-  line-height: 60px;
+  padding: 0;
+}
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 100%;
+}
+.header-content h1 {
+  margin: 0;
+  font-size: 24px;
+}
+.el-menu--horizontal {
+  border-bottom: none;
+  background-color: transparent;
+}
+.el-menu--horizontal .el-menu-item {
+  color: white;
+  border-bottom: 2px solid transparent;
+}
+.el-menu--horizontal .el-menu-item:hover,
+.el-menu--horizontal .el-menu-item.is-active {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: white;
 }
 .el-main {
   padding: 20px;
+  background-color: #f5f5f5;
 }
 </style>
