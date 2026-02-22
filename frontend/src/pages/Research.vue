@@ -1,0 +1,1 @@
+<template><div><h2>研究方向</h2></div></template><script>export default{name:"Research"}</script>
