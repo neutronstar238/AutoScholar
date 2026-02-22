@@ -17,6 +17,7 @@ class LiteratureSearchRequest(BaseModel):
     query: str
     limit: int = 10
     source: str = "arxiv"
+    sort_by: str = "relevance"  # relevance | submittedDate | lastUpdatedDate
 
 
 class LiteratureSearchResponse(BaseModel):
@@ -31,12 +32,18 @@ async def search_papers(request: LiteratureSearchRequest):
     搜索学术文献
     
     支持 arXiv 和 Semantic Scholar
+    
+    排序选项:
+    - relevance: 相关性排序（默认）
+    - submittedDate: 提交日期排序
+    - lastUpdatedDate: 最后更新日期排序
     """
     try:
         results = await search_literature(
             query=request.query,
             limit=request.limit,
-            source=request.source
+            source=request.source,
+            sort_by=request.sort_by
         )
         
         return LiteratureSearchResponse(
@@ -57,11 +64,12 @@ async def search_papers(request: LiteratureSearchRequest):
 @router.get("/search/simple")
 async def search_papers_simple(
     q: str = Query(..., description="搜索关键词"),
-    limit: int = Query(10, description="结果数量")
+    limit: int = Query(10, description="结果数量"),
+    sort_by: str = Query("relevance", description="排序方式: relevance | submittedDate | lastUpdatedDate")
 ):
     """简化的文献搜索接口"""
     try:
-        results = await search_literature(q, limit)
+        results = await search_literature(q, limit, sort_by=sort_by)
         return {
             "success": True,
             "count": len(results),
