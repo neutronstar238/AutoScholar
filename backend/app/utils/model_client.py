@@ -14,18 +14,8 @@ class ModelClient:
     """AI 模型客户端 - 支持自动回退"""
     
     def __init__(self):
-        self.base_urls = {
-            "qwen3.5": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-            "qwen": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-            "deepseek": "https://api.deepseek.com/v1",
-            "openai": "https://api.openai.com/v1",
-        }
-        self.models = {
-            "qwen3.5": "qwen-plus",  # Qwen 3.5 使用 qwen-plus
-            "qwen": "qwen-turbo",     # Qwen 使用 qwen-turbo
-            "deepseek": "deepseek-chat",
-            "openai": "gpt-4",
-        }
+        # 不再硬编码，从配置读取
+        pass
     
     async def chat_completion(
         self,
@@ -97,8 +87,9 @@ class ModelClient:
     ) -> Optional[Dict[str, Any]]:
         """调用指定提供商的 API"""
         
-        base_url = self.base_urls.get(provider)
-        model = self.models.get(provider)
+        # 从配置读取 base_url 和 model
+        base_url = settings.get_base_url(provider)
+        model = settings.get_model(provider)
         
         if not base_url or not model:
             raise ValueError(f"不支持的提供商：{provider}")

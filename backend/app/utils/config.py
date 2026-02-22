@@ -23,12 +23,23 @@ class Settings(BaseSettings):
     # ===== AI 模型配置 =====
     # API 模式 - 支持多个提供商，按优先级排序
     QWEN35_API_KEY: Optional[str] = None  # Qwen 3.5 (优先)
+    QWEN35_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    QWEN35_MODEL: str = "qwen-plus"
+    
     QWEN_API_KEY: Optional[str] = None    # Qwen (备选)
+    QWEN_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    QWEN_MODEL: str = "qwen-turbo"
+    
     DEEPSEEK_API_KEY: Optional[str] = None
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
+    DEEPSEEK_MODEL: str = "deepseek-chat"
+    
     OPENAI_API_KEY: Optional[str] = None
+    OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    OPENAI_MODEL: str = "gpt-4"
     
     # 模型提供商优先级列表 (默认使用 Qwen3.5，失败则回退到 Qwen)
-    MODEL_PROVIDERS: List[str] = ["qwen3.5", "qwen"]
+    MODEL_PROVIDERS: str = "qwen3.5,qwen"  # 逗号分隔的字符串
     PRIMARY_PROVIDER: str = "qwen3.5"
     FALLBACK_PROVIDER: str = "qwen"
     
@@ -81,7 +92,8 @@ class Settings(BaseSettings):
         """获取可用的提供商列表"""
         if self.is_ollama_mode:
             return ["ollama"]
-        return self.MODEL_PROVIDERS
+        # 将逗号分隔的字符串转换为列表
+        return [p.strip() for p in self.MODEL_PROVIDERS.split(",")]
     
     def get_api_key(self, provider: str) -> Optional[str]:
         """获取指定提供商的 API Key"""
@@ -94,12 +106,34 @@ class Settings(BaseSettings):
         }
         return key_map.get(provider)
     
+    def get_base_url(self, provider: str) -> Optional[str]:
+        """获取指定提供商的 Base URL"""
+        url_map = {
+            "qwen3.5": self.QWEN35_BASE_URL,
+            "qwen": self.QWEN_BASE_URL,
+            "deepseek": self.DEEPSEEK_BASE_URL,
+            "openai": self.OPENAI_BASE_URL,
+            "ollama": self.OLLAMA_BASE_URL
+        }
+        return url_map.get(provider)
+    
+    def get_model(self, provider: str) -> Optional[str]:
+        """获取指定提供商的模型名称"""
+        model_map = {
+            "qwen3.5": self.QWEN35_MODEL,
+            "qwen": self.QWEN_MODEL,
+            "deepseek": self.DEEPSEEK_MODEL,
+            "openai": self.OPENAI_MODEL,
+            "ollama": self.OLLAMA_MODEL
+        }
+        return model_map.get(provider)
+    
     def validate(self) -> bool:
         """验证配置是否有效"""
         if self.is_api_mode:
             # 检查至少有一个提供商配置了 API Key
             has_key = False
-            for provider in self.MODEL_PROVIDERS:
+            for provider in self.available_providers:
                 if self.get_api_key(provider):
                     has_key = True
                     break
@@ -111,7 +145,8 @@ class Settings(BaseSettings):
         return True
     
     class Config:
-        env_file = ".env"
+        env_file = "../.env"  # .env 文件在项目根目录
+        env_file_encoding = 'utf-8'
         case_sensitive = True
 
 
