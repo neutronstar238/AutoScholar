@@ -145,7 +145,18 @@ class Settings(BaseSettings):
         return True
     
     class Config:
-        env_file = "../.env"  # .env 文件在项目根目录
+        # 尝试多个可能的 .env 文件位置
+        import os
+        from pathlib import Path
+        
+        # 获取当前文件所在目录
+        current_dir = Path(__file__).parent
+        # 项目根目录（backend 的上一级）
+        root_dir = current_dir.parent.parent.parent
+        
+        # 优先使用根目录的 .env
+        env_file = str(root_dir / ".env")
+        
         env_file_encoding = 'utf-8'
         case_sensitive = True
 

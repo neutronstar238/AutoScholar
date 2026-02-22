@@ -69,7 +69,9 @@ class ModelClient:
                     return result
                 
             except Exception as e:
-                logger.error(f"❌ {provider} 调用失败：{e}")
+                import traceback
+                error_detail = traceback.format_exc()
+                logger.error(f"❌ {provider} 调用失败：{str(e)}\n{error_detail}")
                 if provider == providers[-1]:
                     # 已经是最后一个提供商，抛出异常
                     raise
@@ -94,7 +96,7 @@ class ModelClient:
         if not base_url or not model:
             raise ValueError(f"不支持的提供商：{provider}")
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=60.0) as client:  # 增加超时到 60 秒
             response = await client.post(
                 f"{base_url}/chat/completions",
                 headers={
