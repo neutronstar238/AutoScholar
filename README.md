@@ -18,6 +18,14 @@
 ## 简介
 AI 驱动的学术研究助手，支持文献检索、笔记生成、方向推荐。
 
+## 系统要求
+
+- Python 3.10-3.13 (推荐 3.11)
+  - ⚠️ Python 3.14+ 暂不支持部分依赖库（crewai, langgraph）
+- Node.js 18+ (前端)
+- PostgreSQL 15+ (可选，用于数据持久化)
+- Redis 7+ (可选，用于缓存)
+
 ## 快速开始
 
 ### 方式一：Docker Compose (推荐)
@@ -37,31 +45,52 @@ docker-compose up -d
 
 ### 方式二：本地完整部署 (无需 Docker)
 
+**前置要求：Python 3.10-3.13 (推荐 3.11)**
+
 ```bash
 # 1. 克隆项目
 git clone https://github.com/neutronstar238/AutoScholar.git
 cd AutoScholar
 
-# 2. 安装后端依赖
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，至少配置一个 AI 模型的 API Key
+
+# 3. 创建虚拟环境并安装后端依赖
 cd backend
-pip3 install -r requirements.txt
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Linux/Mac:
+source .venv/bin/activate
+pip install -r requirements.txt
 
-# 3. 启动后端 (终端 1)
-python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# 4. 启动后端 (终端 1)
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# 4. 安装前端依赖 (新开终端)
+# 5. 安装前端依赖 (新开终端)
 cd frontend
 npm install
 
-# 5. 启动前端 (终端 2)
+# 6. 启动前端 (终端 2)
 npm run dev
 
-# 6. 访问
+# 7. 访问
 # 前端：http://localhost:5173
 # 后端 API：http://localhost:8000/docs
 ```
 
 ## 常见问题
+
+**Python 版本不兼容**
+```bash
+# 检查 Python 版本
+python --version
+
+# 需要 Python 3.10-3.13 (推荐 3.11)
+# Python 3.14+ 暂不支持，请安装 Python 3.11
+# 下载地址：https://www.python.org/downloads/
+```
 
 **Docker 认证错误**: 使用本地部署方式或 `docker login`
 

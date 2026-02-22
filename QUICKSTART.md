@@ -14,6 +14,14 @@
 
 ## 🚀 启动步骤
 
+### 前置要求
+
+- Python 3.10-3.13 (推荐 3.11)
+  - ⚠️ 注意：Python 3.14+ 暂不支持，因为 crewai 和 langgraph 库尚未兼容
+  - 检查版本：`python --version`
+  - 如需安装 Python 3.11：https://www.python.org/downloads/
+- Node.js 18+
+
 ### 1. 配置环境变量
 
 编辑 `.env` 文件，至少配置一个 AI 模型的 API Key：
@@ -30,7 +38,20 @@ QWEN35_API_KEY=sk-your-api-key-here
 
 ```bash
 cd backend
+
+# 创建虚拟环境 (推荐使用 Python 3.11)
+python -m venv .venv
+
+# 激活虚拟环境
+# Windows:
+.venv\Scripts\activate
+# Linux/Mac:
+source .venv/bin/activate
+
+# 安装依赖
 pip install -r requirements.txt
+
+# 启动后端
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
