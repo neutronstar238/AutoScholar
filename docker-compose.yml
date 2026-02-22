@@ -1,102 +1,36 @@
 version: '3.8'
 
 services:
-  # 后端服务
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: autoscholar-backend
-    restart: unless-stopped
+    build: ./backend
     ports:
       - "8000:8000"
     environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
-      - DATABASE_URL=postgresql://autoscholar:autoscholar@db:5432/autoscholar
+      - DATABASE_URL=postgresql+asyncpg://autoscholar:autoscholar@db:5432/autoscholar
       - REDIS_URL=redis://redis:6379/0
-      - OLLAMA_ENABLED=${OLLAMA_ENABLED:-false}
-      - OLLAMA_BASE_URL=http://ollama:11434
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    volumes:
-      - ./backend/app:/app/app
-      - ./backend/.env:/app/.env
-    networks:
-      - autoscholar-network
+      - db
+      - redis
 
-  # 前端服务
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: autoscholar-frontend
-    restart: unless-stopped
+    build: ./frontend
     ports:
       - "3000:80"
-    depends_on:
-      - backend
-    networks:
-      - autoscholar-network
 
-  # PostgreSQL 数据库
   db:
     image: postgres:15-alpine
-    container_name: autoscholar-db
-    restart: unless-stopped
     environment:
       POSTGRES_DB: autoscholar
       POSTGRES_USER: autoscholar
       POSTGRES_PASSWORD: autoscholar
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U autoscholar"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - autoscholar-network
 
-  # Redis 缓存
   redis:
     image: redis:7-alpine
-    container_name: autoscholar-redis
-    restart: unless-stopped
     volumes:
       - redis_data:/data
-    networks:
-      - autoscholar-network
-
-  # Ollama (可选，本地模型部署)
-  ollama:
-    image: ollama/ollama:latest
-    container_name: autoscholar-ollama
-    restart: unless-stopped
-    profiles:
-      - ollama  # 使用 docker-compose --profile ollama up 启动
-    volumes:
-      - ollama_data:/root/.ollama
-    ports:
-      - "11434:11434"
-    networks:
-      - autoscholar-network
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
-networks:
-  autoscholar-network:
-    driver: bridge
 
 volumes:
   postgres_data:
   redis_data:
-  ollama_data:
