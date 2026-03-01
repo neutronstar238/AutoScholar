@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from app.utils.cache_manager import cache_manager
 from app.utils.quality_monitor import quality_monitor
+from app.utils.project_checkpoint import project_checkpoint
 
 router = APIRouter()
 
@@ -32,3 +33,8 @@ async def quality_metrics():
 @router.get("/quality/check")
 async def quality_check():
     return {"success": True, **quality_monitor.quality_check()}
+
+
+@router.get("/checkpoint/p4")
+async def checkpoint_p4():
+    return {"success": True, **project_checkpoint.check_p4()}
