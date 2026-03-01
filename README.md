@@ -95,6 +95,28 @@ npm run dev
 - 文献检索支持缓存优先读取，降低外部 API 波动带来的影响。
 - 推荐响应新增 `is_fallback`、`fallback_strategy`、`fallback_rate`、`fallback_note`，便于前端展示与监控。
 
+### P1 进行中（当前进展）
+- 新增 `UserProfileManager`，支持基于搜索/阅读行为更新兴趣权重，并支持输入兴趣建议。
+- 新增 `RecommendationEngine`，将显式兴趣与用户画像兴趣合并后进行个性化检索与置信度排序。
+- 新增 `TrendAnalyzer`，对候选论文执行热度/趋势打分，并融合到推荐 `confidence`。
+- 新增 `FeedbackCollector` 与 `/feedback` 端点，支持 helpful/not_helpful/ignore 反馈采集与指标统计。
+- 新增 `/learning-path` 端点，支持 3-5 阶段学习路径规划（最多 15 篇）。
+- 推荐提示词升级为结构化专家模板，输出更完整（方向、机会、论文解读、4周计划、风险）。
+
+
+### P2 已交付要点
+- 新增布尔查询解析器（AND/OR/NOT + 括号优先级），并集成到文献搜索链路。
+- 新增高级过滤（日期范围、作者、分类）和相关性评分器（标题/摘要权重 + 时间衰减）。
+- 新增搜索历史接口：`GET /search-history`、`DELETE /search-history`（默认保留最近 90 天）。
+- 新增热门搜索与自动补全：`GET /hot-searches`、`GET /autocomplete`。
+- 新增缓存监控与管理接口：`GET /platform/cache/stats`、`POST /platform/cache/clear`。
+
+### P3 已交付要点
+- 新增 `QualityMonitor`，统一记录检索/推荐延迟与降级率，并输出 P95 指标。
+- 推荐与检索接口已接入质量埋点，支持在线观测性能与降级趋势。
+- 平台接口新增 `GET /platform/quality/metrics` 与 `GET /platform/quality/check`，便于发布后巡检。
+- 补充 P3 质量监控单元测试，验证指标计算与阈值判定。
+
 ## 常见问题
 
 **Python 版本不兼容**

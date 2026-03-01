@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.utils.cache_manager import cache_manager
+from app.utils.quality_monitor import quality_monitor
 
 router = APIRouter()
 
@@ -21,3 +22,13 @@ async def cache_stats():
 async def cache_clear():
     result = await cache_manager.clear()
     return {"success": True, **result}
+
+
+@router.get("/quality/metrics")
+async def quality_metrics():
+    return {"success": True, "metrics": quality_monitor.metrics()}
+
+
+@router.get("/quality/check")
+async def quality_check():
+    return {"success": True, **quality_monitor.quality_check()}

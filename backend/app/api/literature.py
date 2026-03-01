@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from time import perf_counter
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -14,6 +15,7 @@ from app.utils.filter_manager import filter_manager
 from app.utils.query_parser import query_parser
 from app.utils.relevance_scorer import relevance_scorer
 from app.utils.search_history_manager import search_history_manager
+from app.utils.quality_monitor import quality_monitor
 
 router = APIRouter()
 
@@ -43,6 +45,7 @@ class LiteratureSearchResponse(BaseModel):
 async def search_papers(request: LiteratureSearchRequest):
     """增强文献搜索：布尔解析 + 高级过滤 + 相关性评分 + 历史/热门统计。"""
     try:
+        start_ts = perf_counter()
         ast = query_parser.parse_query(request.query)
         parsed_query = query_parser.to_search_query(ast)
 
@@ -67,6 +70,7 @@ async def search_papers(request: LiteratureSearchRequest):
         search_history_manager.record(request.user_id, request.query)
         cache_manager.record_search_query(request.query)
 
+        quality_monitor.record_search_latency((perf_counter() - start_ts) * 1000)
         return LiteratureSearchResponse(
             success=True,
             data={
