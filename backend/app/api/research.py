@@ -3,6 +3,7 @@ from collections import deque
 from typing import Deque, List
 
 from fastapi import APIRouter, HTTPException
+from loguru import logger
 from pydantic import BaseModel
 from loguru import logger
 
