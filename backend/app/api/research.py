@@ -41,10 +41,9 @@ async def recommend(request: ResearchRecommendRequest):
     try:
         logger.info(f"推荐研究方向，兴趣：{request.interests}")
 
-        safe_limit = max(3, request.limit)
         papers, is_fallback, strategy = await search_engine.search_with_fallback(
             interests=request.interests,
-            limit=safe_limit,
+            limit=max(3, request.limit),
         )
 
         # 如果降级策略仍无结果，构造最小保底推荐
@@ -64,7 +63,7 @@ async def recommend(request: ResearchRecommendRequest):
             papers,
             key=lambda x: x.get("published", ""),
             reverse=True,
-        )[:safe_limit]
+        )[: max(3, request.limit)]
 
         papers_summary = "\n\n".join([
             f"标题：{p.get('title', '')}\n"
@@ -94,8 +93,6 @@ async def recommend(request: ResearchRecommendRequest):
         if rate > 0.2:
             logger.warning(f"推荐降级率过高: {rate:.2%}")
 
-        fallback_note = _build_troubleshooting_message(request.interests) if is_fallback else None
-
         return {
             "success": True,
             "interests": request.interests,
@@ -106,7 +103,6 @@ async def recommend(request: ResearchRecommendRequest):
             "is_fallback": is_fallback,
             "fallback_strategy": strategy,
             "fallback_rate": rate,
-            "fallback_note": fallback_note,
         }
 
     except Exception as e:
