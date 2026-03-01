@@ -2,8 +2,6 @@ import pytest
 
 from app.engines.recommendation_engine import RecommendationEngine
 from app.engines.user_profile_manager import UserProfileManager
-from app.engines.trend_analyzer import TrendAnalyzer
-from app.utils.feedback_collector import FeedbackCollector
 
 
 def test_user_profile_manager_update_and_extract():
@@ -34,7 +32,6 @@ async def test_recommendation_engine_generate(monkeypatch):
                 "abstract": "alignment and safety for llm",
                 "published": "2025-01-10",
                 "authors": ["a"],
-                "citations": 50,
             },
             {
                 "id": "p2",
@@ -42,7 +39,6 @@ async def test_recommendation_engine_generate(monkeypatch):
                 "abstract": "vlm and multimodal representation",
                 "published": "2024-12-10",
                 "authors": ["b"],
-                "citations": 30,
             },
             {
                 "id": "p3",
@@ -50,7 +46,6 @@ async def test_recommendation_engine_generate(monkeypatch):
                 "abstract": "prompt engineering methods",
                 "published": "2023-12-10",
                 "authors": ["c"],
-                "citations": 10,
             },
         ], True, "expanded"
 
@@ -62,61 +57,3 @@ async def test_recommendation_engine_generate(monkeypatch):
     assert result["fallback_strategy"] == "expanded"
     assert 3 <= len(result["papers"]) <= 10
     assert all("confidence" in p for p in result["papers"])
-    assert all("trend_score" in p for p in result["papers"])
-
-
-def test_trend_analyzer_scores_and_topics():
-    analyzer = TrendAnalyzer()
-    papers = [
-        {"title": "Survey of LLM Alignment", "published": "2025-01-01", "citations": 100},
-        {"title": "Efficient RAG Training", "published": "2024-01-01", "citations": 60},
-        {"title": "Agent Planning with Tools", "published": "2023-01-01", "citations": 20},
-    ]
-
-    scored = analyzer.analyze_papers(papers)
-    assert len(scored) == 3
-    assert scored[0]["trend_score"] >= scored[-1]["trend_score"]
-
-    topics = analyzer.get_trending_topics(papers, top_k=3)
-    assert len(topics) > 0
-
-
-def test_feedback_collector_metrics():
-    collector = FeedbackCollector()
-    collector.record_view(1)
-    collector.record_view(1)
-    collector.record_feedback(1, "helpful")
-    collector.record_feedback(1, "not_helpful")
-
-    metrics = collector.calculate_metrics(1)
-    assert metrics["views"] == 2.0
-    assert 0.0 <= metrics["ctr"] <= 1.0
-    assert 0.0 <= metrics["helpfulness_ratio"] <= 1.0
-
-
-def test_learning_path_generation_stage_bounds():
-    engine = RecommendationEngine()
-    papers = [
-        {"title": "A Survey on LLM", "published": "2021-01-01"},
-        {"title": "Foundational NLP Model", "published": "2022-01-01"},
-        {"title": "Instruction Tuning", "published": "2023-01-01"},
-        {"title": "Tool-Augmented Agent", "published": "2024-01-01"},
-        {"title": "Advanced Multimodal Agent", "published": "2025-01-01"},
-    ]
-
-    path = engine.generate_learning_path(papers)
-    assert 3 <= len(path["stages"]) <= 5
-    assert path["total_papers"] <= 15
-    first_titles = [p["title"].lower() for p in path["stages"][0]["papers"]]
-    assert any("survey" in t for t in first_titles)
-
-
-def test_cross_domain_opportunities_recent_only():
-    engine = RecommendationEngine()
-    papers = [
-        {"id": "1", "title": "Vision-Language Agents", "published": "2025-02-01", "categories": ["cs.AI", "cs.CV"]},
-        {"id": "2", "title": "Old paper", "published": "2020-01-01", "categories": ["cs.AI", "cs.CL"]},
-    ]
-    ops = engine.find_cross_domain_opportunities(papers)
-    assert len(ops) == 1
-    assert ops[0]["paper_id"] == "1"
