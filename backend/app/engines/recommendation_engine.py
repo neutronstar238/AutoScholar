@@ -6,9 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from app.engines.search_engine import search_engine
-from app.engines.trend_analyzer import trend_analyzer
 from app.engines.user_profile_manager import user_profile_manager
-from app.utils.feedback_collector import feedback_collector
 
 
 class RecommendationEngine:
@@ -48,11 +46,6 @@ class RecommendationEngine:
 
         return round(0.7 * overlap_score + 0.3 * recency_score, 4)
 
-    @staticmethod
-    def _is_survey_paper(paper: Dict[str, Any]) -> bool:
-        title = (paper.get("title", "") or "").lower()
-        return any(k in title for k in ["survey", "review", "overview", "综述"])
-
     async def generate_recommendations(self, user_id: int, interests: List[str], limit: int = 5) -> Dict[str, Any]:
         for term in interests:
             user_profile_manager.update_interest_from_search(user_id, term)
@@ -63,16 +56,12 @@ class RecommendationEngine:
         safe_limit = max(3, min(10, limit))
         papers, is_fallback, strategy = await search_engine.search_with_fallback(merged_interests, limit=safe_limit)
 
-        trend_scored = trend_analyzer.analyze_papers(papers)
         scored = []
-        for p in trend_scored:
-            relevance_score = self._paper_score(p, merged_interests)
-            trend_score = p.get("trend_score", 0.0)
+        for p in papers:
+            score = self._paper_score(p, merged_interests)
             item = dict(p)
-            item["confidence"] = round(0.65 * relevance_score + 0.35 * trend_score, 4)
+            item["confidence"] = score
             scored.append(item)
-
-        feedback_collector.record_view(user_id)
 
         scored = sorted(scored, key=lambda x: x.get("confidence", 0.0), reverse=True)[:safe_limit]
 
@@ -83,62 +72,6 @@ class RecommendationEngine:
             "is_fallback": is_fallback,
             "fallback_strategy": strategy,
         }
-
-    def generate_learning_path(self, papers: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """将推荐论文组织为 3-5 阶段学习路径。"""
-        if not papers:
-            return {"stages": [], "total_papers": 0}
-
-        limited = papers[:15]
-        sorted_papers = sorted(limited, key=lambda x: x.get("published", "9999-12-31"))
-        survey = [p for p in sorted_papers if self._is_survey_paper(p)]
-        non_survey = [p for p in sorted_papers if not self._is_survey_paper(p)]
-        ordered = survey + non_survey
-
-        stage_count = 3
-        if len(ordered) >= 9:
-            stage_count = 4
-        if len(ordered) >= 13:
-            stage_count = 5
-
-        chunks: List[List[Dict[str, Any]]] = [[] for _ in range(stage_count)]
-        for idx, paper in enumerate(ordered):
-            chunks[min(stage_count - 1, idx * stage_count // max(1, len(ordered)))].append(paper)
-
-        stage_names = [
-            "基础构建",
-            "核心方法",
-            "进阶专题",
-            "前沿探索",
-            "研究产出",
-        ]
-        stages = []
-        for i, stage_papers in enumerate(chunks):
-            if not stage_papers:
-                continue
-            stages.append(
-                {
-                    "stage": i + 1,
-                    "name": stage_names[i],
-                    "goal": f"完成{stage_names[i]}阶段并形成阶段笔记",
-                    "papers": stage_papers,
-                }
-            )
-
-        return {
-            "stages": stages,
-            "total_papers": len(ordered),
-        }
-
-    def record_recommendation_feedback(self, user_id: int, paper: Dict[str, Any], feedback: str) -> Dict[str, float]:
-        feedback_collector.record_feedback(user_id, feedback)
-        user_profile_manager.update_interest_from_reading(
-            user_id=user_id,
-            title=paper.get("title", ""),
-            abstract=paper.get("abstract", ""),
-            feedback=feedback,
-        )
-        return feedback_collector.calculate_metrics(user_id)
 
     def suggest_interests(self, user_id: int, text: str) -> List[str]:
         base = user_profile_manager.suggest_interests_for_input(text)
