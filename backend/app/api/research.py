@@ -10,6 +10,9 @@ from app.engines.recommendation_engine import recommendation_engine
 from app.utils.model_client import model_client
 from app.utils.quality_monitor import quality_monitor
 
+from app.engines.search_engine import search_engine
+from app.utils.model_client import model_client
+
 router = APIRouter()
 
 
