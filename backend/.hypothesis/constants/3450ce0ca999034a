@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\utils\trending_manager.py
+# hypothesis_version: 6.151.9
+
+[0.95, 1.0, 100, 365, ',', 'abstract', 'authors', 'category', 'general', 'id', 'last_recommended_at', 'paper_id', 'recommended_count', 'score', 'title', 'url']

@@ -14,10 +14,8 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from loguru import logger
-from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import TrendingPaper, get_engine
+from app.storage.local_storage import local_storage
 
 
 class TrendingManager:
@@ -52,80 +50,69 @@ class TrendingManager:
             authors: 作者列表（逗号分隔）
             category: 论文分类
         """
-        engine = get_engine()
-        async with AsyncSession(engine) as session:
-            try:
-                # 查询是否已存在
-                stmt = select(TrendingPaper).where(TrendingPaper.paper_id == paper_id)
-                result = await session.execute(stmt)
-                existing = result.scalar_one_or_none()
+        try:
+            # 查询是否已存在
+            existing = await local_storage.get_trending_paper_by_paper_id(paper_id)
+            
+            if existing:
+                # 更新现有记录
+                recommended_count = int(existing['recommended_count']) + 1
+                last_recommended_at = datetime.utcnow().isoformat()
                 
-                if existing:
-                    # 更新现有记录
-                    existing.recommended_count += 1
-                    existing.last_recommended_at = datetime.utcnow()
-                    # 评分 = 推荐次数 * 时间衰减因子
-                    days_since_last = (datetime.utcnow() - existing.last_recommended_at).days
-                    time_decay = 0.95 ** days_since_last
-                    existing.score = existing.recommended_count * time_decay
-                    logger.info(f"更新热门论文: {paper_id}, 推荐次数: {existing.recommended_count}")
-                else:
-                    # 创建新记录
-                    new_paper = TrendingPaper(
-                        paper_id=paper_id,
-                        title=title,
-                        abstract=abstract,
-                        url=url,
-                        authors=authors,
-                        category=category,
-                        score=1.0,
-                        recommended_count=1,
-                        last_recommended_at=datetime.utcnow()
-                    )
-                    session.add(new_paper)
-                    logger.info(f"创建热门论文: {paper_id}")
+                # 评分 = 推荐次数 * 时间衰减因子
+                last_time = datetime.fromisoformat(existing['last_recommended_at'])
+                days_since_last = (datetime.utcnow() - last_time).days
+                time_decay = 0.95 ** days_since_last
+                score = recommended_count * time_decay
                 
-                await session.commit()
-                
-                # 清理旧的热门论文（保持最多max_trending_papers条）
-                await self._cleanup_old_papers(session)
-                
-            except Exception as e:
-                await session.rollback()
-                logger.error(f"更新热门论文失败: {e}")
-                raise
-            finally:
-                await engine.dispose()
+                await local_storage.update_trending_paper(paper_id, {
+                    'recommended_count': str(recommended_count),
+                    'last_recommended_at': last_recommended_at,
+                    'score': str(score)
+                })
+                logger.info(f"更新热门论文: {paper_id}, 推荐次数: {recommended_count}")
+            else:
+                # 创建新记录
+                await local_storage.create_trending_paper({
+                    'paper_id': paper_id,
+                    'title': title,
+                    'abstract': abstract,
+                    'url': url,
+                    'authors': authors,
+                    'category': category,
+                    'score': 1.0,
+                    'recommended_count': 1,
+                    'last_recommended_at': datetime.utcnow().isoformat()
+                })
+                logger.info(f"创建热门论文: {paper_id}")
+            
+            # 清理旧的热门论文（保持最多max_trending_papers条）
+            await self._cleanup_old_papers()
+            
+        except Exception as e:
+            logger.error(f"更新热门论文失败: {e}")
+            raise
     
-    async def _cleanup_old_papers(self, session: AsyncSession) -> None:
+    async def _cleanup_old_papers(self) -> None:
         """清理评分最低的热门论文，保持数量在限制内。"""
         try:
             # 查询总数
-            count_stmt = select(TrendingPaper)
-            result = await session.execute(count_stmt)
-            total_count = len(result.scalars().all())
+            total_count = await local_storage.count_trending_papers()
             
             if total_count > self.max_trending_papers:
                 # 删除评分最低的论文
                 delete_count = total_count - self.max_trending_papers
-                # 获取评分最低的论文ID
-                stmt = (
-                    select(TrendingPaper.id)
-                    .order_by(TrendingPaper.score.asc())
-                    .limit(delete_count)
-                )
-                result = await session.execute(stmt)
-                ids_to_delete = [row[0] for row in result.fetchall()]
+                
+                # 获取所有论文并按评分排序
+                all_papers = await local_storage.get_trending_papers(days=365, limit=total_count)
+                
+                # 按评分升序排序，取最低的
+                all_papers.sort(key=lambda x: float(x.get('score', 0)))
+                ids_to_delete = [int(paper['id']) for paper in all_papers[:delete_count]]
                 
                 # 删除这些论文
-                for paper_id in ids_to_delete:
-                    stmt = select(TrendingPaper).where(TrendingPaper.id == paper_id)
-                    result = await session.execute(stmt)
-                    paper = result.scalar_one_or_none()
-                    if paper:
-                        await session.delete(paper)
+                await local_storage.delete_trending_papers_by_ids(ids_to_delete)
                 
-                await session.commit()
                 logger.info(f"清理了 {delete_count} 条低评分热门论文")
         
         except Exception as e:
@@ -147,45 +134,33 @@ class TrendingManager:
         Returns:
             热门论文列表，按评分降序排列
         """
-        engine = get_engine()
-        async with AsyncSession(engine) as session:
-            try:
-                # 构建查询
-                cutoff_date = datetime.utcnow() - timedelta(days=days)
-                stmt = (
-                    select(TrendingPaper)
-                    .where(TrendingPaper.last_recommended_at >= cutoff_date)
-                    .order_by(TrendingPaper.score.desc())
-                    .limit(limit)
-                )
-                
-                if category:
-                    stmt = stmt.where(TrendingPaper.category == category)
-                
-                result = await session.execute(stmt)
-                papers = result.scalars().all()
-                
-                # 转换为字典列表
-                return [
-                    {
-                        "id": paper.paper_id,
-                        "title": paper.title,
-                        "abstract": paper.abstract,
-                        "url": paper.url,
-                        "authors": paper.authors.split(",") if paper.authors else [],
-                        "category": paper.category,
-                        "score": paper.score,
-                        "recommended_count": paper.recommended_count,
-                        "last_recommended_at": paper.last_recommended_at.isoformat()
-                    }
-                    for paper in papers
-                ]
+        try:
+            # 从本地存储获取热门论文
+            papers = await local_storage.get_trending_papers(
+                category=category,
+                days=days,
+                limit=limit
+            )
             
-            except Exception as e:
-                logger.error(f"获取热门论文失败: {e}")
-                return []
-            finally:
-                await engine.dispose()
+            # 转换为字典列表
+            return [
+                {
+                    "id": paper['paper_id'],
+                    "title": paper['title'],
+                    "abstract": paper['abstract'],
+                    "url": paper['url'],
+                    "authors": paper['authors'].split(",") if paper['authors'] else [],
+                    "category": paper['category'],
+                    "score": float(paper['score']),
+                    "recommended_count": int(paper['recommended_count']),
+                    "last_recommended_at": paper['last_recommended_at']
+                }
+                for paper in papers
+            ]
+        
+        except Exception as e:
+            logger.error(f"获取热门论文失败: {e}")
+            return []
     
     async def get_trending_by_category(
         self,

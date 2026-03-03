@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\engines\user_profile_manager.py
+# hypothesis_version: 6.151.9
+
+[-0.15, 0.0, 0.1, 0.2, 0.3, 0.4, 0.9, 30.0, 'NFKC', '[\\u4e00-\\u9fff]', '[^\\w\\u4e00-\\u9fff]+', '[^\\w]+', 'count', 'created_at', 'description', 'helpful', 'id', 'keyword', 'last_updated', 'query', 'search_history', 'source', 'user_id', 'user_profile', 'weight']

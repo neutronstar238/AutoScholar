@@ -94,13 +94,13 @@
 
 ### Phase 2: P1 重要功能 - 推荐质量增强
 
-- [ ] 8. 创建用户画像数据模型
+- [x] 8. 创建用户画像数据模型
   - 在backend/app/models/base.py添加UserInterest模型
   - 在backend/app/models/base.py添加SearchHistory模型
   - 实现数据库迁移
   - _Requirements: 5.1, 5.2, 10.1_
 
-- [ ] 9. 实现用户画像管理器
+- [x] 9. 实现用户画像管理器
   - 创建backend/app/engines/user_profile_manager.py
   - 实现extract_interests方法（从历史提取兴趣）
   - 实现suggest_interests_for_input方法（输入建议）
@@ -109,7 +109,7 @@
   - 实现兴趣权重计算公式
   - _Requirements: 5.1, 5.2, 5.4, 5.5_
 
-- [ ]* 9.1 编写用户画像管理器的属性测试
+- [x] 9.1 编写用户画像管理器的属性测试
   - **Property 20: 用户兴趣自动提取**
   - **Property 21: 用户兴趣关键词提取权重**
   - **Property 22: 阅读行为追踪**
@@ -117,7 +117,7 @@
   - **Property 25: 兴趣关键词数量上限**
   - **Validates: Requirements 5.1, 5.2, 5.4, 5.5**
 
-- [ ] 10. 实现推荐引擎核心逻辑
+- [x] 10. 实现推荐引擎核心逻辑
   - 创建backend/app/engines/recommendation_engine.py
   - 实现generate_recommendations方法（四种模式）
   - 实现suggest_interests方法
@@ -125,7 +125,7 @@
   - 集成搜索引擎
   - _Requirements: 5.1, 5.3_
 
-- [ ]* 10.1 编写推荐引擎的属性测试
+- [x] 10.1 编写推荐引擎的属性测试
   - **Property 23: 个性化推荐优先级**
   - **Validates: Requirements 5.3**
 

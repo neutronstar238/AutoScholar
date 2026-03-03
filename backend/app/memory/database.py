@@ -1,12 +1,14 @@
-"""数据库初始化模块"""
+"""数据存储初始化模块 - 使用本地文件存储"""
 from loguru import logger
-from app.models.base import init_db
+from app.storage.local_storage import local_storage
 
 async def init_database():
-    """初始化数据库"""
+    """初始化本地文件存储（CSV文件）"""
     try:
-        await init_db()
-        logger.info("✅ 数据库表创建成功")
+        # 本地存储会在首次访问时自动初始化CSV文件
+        # 这里只是确保存储目录存在
+        logger.info("✅ 本地文件存储已就绪（使用CSV文件）")
+        logger.info(f"📁 数据存储位置: {local_storage.data_dir}")
     except Exception as e:
-        logger.warning(f"⚠️  数据库初始化警告：{e}")
-        logger.info("如果数据库未运行，某些功能可能不可用")
+        logger.error(f"❌ 本地存储初始化失败：{e}")
+        raise

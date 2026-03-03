@@ -98,8 +98,8 @@ async def recommend(request: ResearchRecommendRequest):
 
         safe_limit = max(3, min(10, request.limit))
         rec = await recommendation_engine.generate_recommendations(
-            user_id=request.user_id,
             interests=request.interests,
+            user_id=request.user_id,
             limit=safe_limit,
         )
 
@@ -176,7 +176,7 @@ async def recommend(request: ResearchRecommendRequest):
 async def suggest_interests(request: InterestSuggestRequest):
     """基于输入文本和用户画像提供兴趣关键词建议。"""
     try:
-        suggestions = recommendation_engine.suggest_interests(request.user_id, request.text)
+        suggestions = await recommendation_engine.suggest_interests(request.user_id, limit=10)
         return {"success": True, "user_id": request.user_id, "suggestions": suggestions}
     except Exception as e:
         logger.error(f"兴趣建议失败：{e}")
@@ -189,8 +189,8 @@ async def learning_path(request: LearningPathRequest):
     try:
         safe_limit = max(3, min(15, request.limit))
         rec = await recommendation_engine.generate_recommendations(
-            user_id=request.user_id,
             interests=request.interests,
+            user_id=request.user_id,
             limit=safe_limit,
         )
         path = recommendation_engine.generate_learning_path(rec.get("papers", []))
@@ -214,7 +214,7 @@ async def recommendation_feedback(request: RecommendationFeedbackRequest):
         if request.feedback not in {"helpful", "not_helpful", "ignore"}:
             raise HTTPException(status_code=400, detail="feedback 必须是 helpful/not_helpful/ignore")
 
-        metrics = recommendation_engine.record_recommendation_feedback(
+        metrics = await recommendation_engine.record_recommendation_feedback(
             user_id=request.user_id,
             paper=request.paper,
             feedback=request.feedback,
@@ -233,8 +233,8 @@ async def cross_domain(request: CrossDomainRequest):
     try:
         safe_limit = max(3, min(20, request.limit))
         rec = await recommendation_engine.generate_recommendations(
-            user_id=request.user_id,
             interests=request.interests,
+            user_id=request.user_id,
             limit=safe_limit,
         )
         opportunities = recommendation_engine.find_cross_domain_opportunities(rec.get("papers", []))

@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\storage\local_storage.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 3600, 'abstract', 'api_key', 'authors', 'backend/data', 'category', 'content', 'count', 'created_at', 'email', 'general', 'id', 'keyword', 'last_recommended_at', 'last_updated', 'model_used', 'notes', 'notes.csv', 'paper_id', 'papers', 'papers.csv', 'published_date', 'query', 'r', 'recommended_count', 'result_count', 'score', 'search_history', 'search_history.csv', 'source', 'title', 'trending_papers', 'trending_papers.csv', 'updated_at', 'url', 'user_id', 'user_interests', 'user_interests.csv', 'username', 'users', 'users.csv', 'utf-8', 'w', 'weight']

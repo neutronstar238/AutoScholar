@@ -1,90 +1,88 @@
-"""数据库基础模型"""
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Text, Float
-from sqlalchemy.ext.asyncio import create_async_engine
+"""数据模型定义（仅用于类型提示和文档）
+
+注意：本项目已迁移到本地文件存储（CSV），不再使用SQL数据库。
+这些模型定义保留用于：
+1. 代码文档和类型提示
+2. 数据结构参考
+3. 未来可能的数据库迁移
+
+实际数据操作请使用：
+from app.storage.local_storage import local_storage
+"""
+
 from datetime import datetime
-import os
-
-Base = declarative_base()
+from typing import Optional
 
 
-class BaseModel(Base):
-    __abstract__ = True
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+class BaseModel:
+    """基础模型（仅用于文档）"""
+    id: int
+    created_at: datetime
+    updated_at: datetime
 
 
 class Paper(BaseModel):
-    """论文表"""
-    __tablename__ = 'papers'
-
-    title = Column(String(500), nullable=False)
-    abstract = Column(Text)
-    url = Column(String(500), unique=True)
-    authors = Column(String(1000))
-    published_date = Column(String(20))
+    """论文表（仅用于文档）"""
+    title: str
+    abstract: Optional[str]
+    url: str
+    authors: Optional[str]
+    published_date: Optional[str]
 
 
 class TrendingPaper(BaseModel):
-    """热门论文缓存表"""
-    __tablename__ = 'trending_papers'
-
-    paper_id = Column(String(128), nullable=False, unique=True)
-    title = Column(String(500), nullable=False)
-    abstract = Column(Text)
-    url = Column(String(500))
-    authors = Column(String(1000))
-    category = Column(String(100), default='general')
-    score = Column(Float, default=0.0)
-    recommended_count = Column(Integer, default=0)
-    last_recommended_at = Column(DateTime, default=datetime.utcnow)
+    """热门论文缓存表（仅用于文档）
+    
+    实际使用：
+    await local_storage.get_trending_papers(limit=10)
+    await local_storage.create_trending_paper({...})
+    """
+    paper_id: str
+    title: str
+    abstract: Optional[str]
+    url: Optional[str]
+    authors: Optional[str]
+    category: str
+    score: float
+    recommended_count: int
+    last_recommended_at: datetime
 
 
 class UserInterest(BaseModel):
-    """用户兴趣画像"""
-    __tablename__ = 'user_interests'
-
-    user_id = Column(Integer, nullable=False)
-    keyword = Column(String(200), nullable=False)
-    weight = Column(Float, default=1.0)
+    """用户兴趣画像（仅用于文档）
+    
+    实际使用：
+    await local_storage.get_user_interests(user_id, limit=10)
+    await local_storage.create_user_interest({...})
+    """
+    user_id: int
+    keyword: str
+    weight: float
+    last_updated: datetime
 
 
 class SearchHistory(BaseModel):
-    """搜索历史"""
-    __tablename__ = 'search_history'
-
-    user_id = Column(Integer, nullable=False)
-    query = Column(String(500), nullable=False)
+    """搜索历史（仅用于文档）
+    
+    实际使用：
+    await local_storage.get_search_history(user_id, days=90)
+    await local_storage.create_search_history({...})
+    """
+    user_id: Optional[int]
+    query: str
+    result_count: int
+    source: str
 
 
 class Note(BaseModel):
-    """研究笔记表"""
-    __tablename__ = 'notes'
-
-    paper_id = Column(Integer, nullable=False)
-    content = Column(Text, nullable=False)
-    model_used = Column(String(100))
+    """研究笔记表（仅用于文档）"""
+    paper_id: int
+    content: str
+    model_used: Optional[str]
 
 
 class User(BaseModel):
-    """用户表"""
-    __tablename__ = 'users'
-
-    username = Column(String(100), unique=True, nullable=False)
-    email = Column(String(200))
-    api_key = Column(String(200))
-
-
-def get_engine():
-    database_url = os.getenv('DATABASE_URL', 'postgresql+asyncpg://autoscholar:autoscholar@localhost:5432/autoscholar')
-    return create_async_engine(database_url, echo=False)
-
-
-async def init_db():
-    """初始化数据库表"""
-    engine = get_engine()
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    await engine.dispose()
+    """用户表（仅用于文档）"""
+    username: str
+    email: Optional[str]
+    api_key: Optional[str]
