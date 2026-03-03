@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\tools\literature_search.py
+# hypothesis_version: 6.151.9
+
+[30.0, 100, 3600, '/', 'abstract', 'arxiv', 'atom', 'atom:author', 'atom:category', 'atom:entry', 'atom:id', 'atom:name', 'atom:published', 'atom:summary', 'atom:title', 'atom:updated', 'authors', 'categories', 'date', 'descending', 'id', 'lastUpdatedDate', 'limit', 'literature', 'max_results', 'published', 'query', 'relevance', 'scholar', 'search_query', 'sortBy', 'sortOrder', 'sort_by', 'source', 'start', 'submittedDate', 'term', 'title', 'updated', 'url']

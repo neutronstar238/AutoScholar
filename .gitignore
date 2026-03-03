@@ -45,6 +45,11 @@ logs/
 .coverage
 htmlcov/
 
+# 缓存目录
+.cache/
+backend/.cache/
+*.cache
+
 # 数据文件
 data/*.db
 data/*.sqlite

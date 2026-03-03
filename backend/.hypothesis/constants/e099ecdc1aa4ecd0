@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\engines\user_profile_manager.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.3, 0.4, 0.7, 1.0, 1.5, '[^\\w\\u4e00-\\u9fff]+', 'helpful', 'ignore', 'keyword', 'not_helpful', 'view', 'weight']

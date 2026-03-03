@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\utils\quality_monitor.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.2, 100, 200, 500, 2000, 'all_passed', 'checks', 'fallback_rate', 'fallback_samples', 'metrics', 'recommend_p95_ms', 'recommend_samples', 'search_p95_lt_2000ms', 'search_p95_ms', 'search_samples']

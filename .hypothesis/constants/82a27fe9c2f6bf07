@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\engines\search_engine.py
+# hypothesis_version: 6.151.9
+
+[0.5, ' AND ', 'all_failed', 'arxiv', 'cache_hit', 'combined', 'computer vision', 'expanded', 'id', 'individual', 'interests', 'large language model', 'limit', 'machine learning', 'search', 'search_term', 'similar_cache', 'submittedDate', 'term', 'title', 'trending_fallback', 'url', '数据库热门论文不足，使用预定义查询搜索']

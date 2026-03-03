@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\utils\feedback_collector.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 'ctr', 'feedback_events', 'helpful', 'helpfulness_ratio', 'not_helpful', 'views']

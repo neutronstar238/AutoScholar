@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\utils\cache_manager.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.7, 1000, 3600, ':', 'REDIS_URL', '_', 'autoscholar', 'deleted', 'hit_rate', 'hits', 'hot_queries', 'max_local_keys', 'misses', 'tracked_keys', 'utf-8', 'writes']

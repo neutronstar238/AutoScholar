@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\models\base.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 100, 128, 200, 500, 1000, 'DATABASE_URL', 'general', 'notes', 'papers', 'search_history', 'trending_papers', 'user_interests', 'users']

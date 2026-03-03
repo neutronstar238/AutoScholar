@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\engines\trend_analyzer.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.12, 0.2, 0.3, 0.5, 0.9, 1.0, 20.0, 'citations', 'is_top_cited', 'published', 'title', 'trend_score']

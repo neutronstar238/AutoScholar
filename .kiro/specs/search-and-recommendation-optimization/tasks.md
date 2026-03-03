@@ -11,20 +11,20 @@
 
 ### Phase 1: P0 关键功能 - 推荐系统修复
 
-- [ ] 1. 设置Redis缓存基础设施
+- [x] 1. 设置Redis缓存基础设施
   - 安装redis-py和fakeredis依赖
   - 创建backend/app/utils/cache_manager.py
   - 实现CacheManager类（get/set/generate_key方法）
   - 配置Redis连接（支持本地开发和生产环境）
   - _Requirements: 4.1, 4.2, 4.3, 4.5_
 
-- [ ]* 1.1 编写缓存管理器的属性测试
+- [x] 1.1 编写缓存管理器的属性测试
   - **Property 8: 缓存优先访问**
   - **Property 9: 缓存存储往返**
   - **Property 11: 缓存键唯一性**
   - **Validates: Requirements 4.1, 4.2, 4.3, 4.5**
 
-- [ ] 2. 实现关键词扩展器和跨语言翻译
+- [x] 2. 实现关键词扩展器和跨语言翻译
   - 创建backend/app/utils/keyword_expander.py
   - 实现语言检测（中文/英文）
   - 实现LLM翻译功能（中文→英文学术术语）
@@ -32,12 +32,12 @@
   - 实现关键词扩展逻辑
   - _Requirements: 2.1, 2.7_
 
-- [ ]* 2.1 编写关键词扩展器的属性测试
+- [x] 2.1 编写关键词扩展器的属性测试
   - **Property 6: 跨语言查询翻译**
   - **Property 7: 查询扩展和合并**
   - **Validates: Requirements 2.1, 2.7**
 
-- [ ] 3. 实现搜索引擎降级策略
+- [x] 3. 实现搜索引擎降级策略
   - 创建backend/app/engines/search_engine.py
   - 实现search_with_fallback方法
   - 策略1: 所有关键词组合搜索
@@ -48,20 +48,20 @@
   - 实现重试机制（3次，指数退避）
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.2, 2.4_
 
-- [ ]* 3.1 编写搜索引擎降级策略的属性测试
+- [x] 3.1 编写搜索引擎降级策略的属性测试
   - **Property 1: 降级策略链完整性**
   - **Property 2: 最小推荐数量保证**
   - **Property 5: API超时缓存降级**
   - **Property 7: 重试指数退避**
   - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 2.4**
 
-- [ ] 4. 创建热门论文缓存表和管理
+- [x] 4. 创建热门论文缓存表和管理
   - 在backend/app/models/base.py添加TrendingPaper模型
   - 实现热门论文更新逻辑（基于推荐次数）
   - 实现热门论文查询接口
   - _Requirements: 1.3, 1.4_
 
-- [ ] 5. 重构研究方向推荐API
+- [x] 5. 重构研究方向推荐API
   - 修改backend/app/api/research.py
   - 更新recommend端点，集成搜索引擎降级策略
   - 添加降级标识到响应（is_fallback字段）
@@ -69,23 +69,23 @@
   - 添加错误处理和用户友好的错误消息
   - _Requirements: 1.5, 1.6, 1.7, 2.3, 2.5, 2.6_
 
-- [ ]* 5.1 编写推荐API的属性测试
+- [x] 5.1 编写推荐API的属性测试
   - **Property 3: 降级标识正确性**
   - **Property 4: 降级率追踪准确性**
   - **Validates: Requirements 1.6, 1.7**
 
-- [ ] 6. 实现缓存集成到文献检索
+- [x] 6. 实现缓存集成到文献检索
   - 修改backend/app/tools/literature_search.py
   - 在search_literature中集成CacheManager
   - 实现缓存优先逻辑
   - 实现缓存失败优雅降级
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ]* 6.1 编写缓存集成的属性测试
+- [x] 6.1 编写缓存集成的属性测试
   - **Property 10: 缓存失败优雅降级**
   - **Validates: Requirements 4.4**
 
-- [ ] 7. Checkpoint - P0功能验证
+- [x] 7. Checkpoint - P0功能验证
   - 确保所有P0测试通过
   - 验证推荐系统不再返回"未找到相关论文"错误
   - 测试中文输入能正确翻译并搜索英文论文

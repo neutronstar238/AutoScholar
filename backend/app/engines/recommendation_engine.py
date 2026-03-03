@@ -5,10 +5,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict, List
 
+from loguru import logger
+
 from app.engines.search_engine import search_engine
 from app.engines.trend_analyzer import trend_analyzer
 from app.engines.user_profile_manager import user_profile_manager
 from app.utils.feedback_collector import feedback_collector
+from app.utils.trending_manager import trending_manager
 
 
 class RecommendationEngine:
@@ -75,6 +78,9 @@ class RecommendationEngine:
         feedback_collector.record_view(user_id)
         scored = sorted(scored, key=lambda x: x.get("confidence", 0.0), reverse=True)[:safe_limit]
 
+        # 更新热门论文表（异步，不阻塞响应）
+        await self._update_trending_papers(scored)
+
         return {
             "papers": scored,
             "profile_interests": profile_interests,
@@ -82,6 +88,40 @@ class RecommendationEngine:
             "is_fallback": is_fallback,
             "fallback_strategy": strategy,
         }
+
+    async def _update_trending_papers(self, papers: List[Dict[str, Any]]) -> None:
+        """更新热门论文表。
+        
+        将推荐的论文记录到TrendingPaper表中，增加推荐计数。
+        
+        Args:
+            papers: 推荐的论文列表
+        """
+        for paper in papers:
+            try:
+                paper_id = paper.get("id", "")
+                if not paper_id:
+                    continue
+                
+                # 提取分类（取第一个）
+                categories = paper.get("categories", [])
+                category = categories[0] if categories else "general"
+                
+                # 提取作者（转换为逗号分隔的字符串）
+                authors = paper.get("authors", [])
+                authors_str = ", ".join(authors) if isinstance(authors, list) else str(authors)
+                
+                await trending_manager.update_trending_paper(
+                    paper_id=paper_id,
+                    title=paper.get("title", ""),
+                    abstract=paper.get("abstract", ""),
+                    url=paper.get("url", ""),
+                    authors=authors_str,
+                    category=category
+                )
+            except Exception as e:
+                # 不阻塞推荐流程，只记录错误
+                logger.warning(f"更新热门论文失败 paper_id={paper.get('id')}: {e}")
 
     def generate_learning_path(self, papers: List[Dict[str, Any]]) -> Dict[str, Any]:
         """将推荐论文组织为 3-5 阶段学习路径。"""

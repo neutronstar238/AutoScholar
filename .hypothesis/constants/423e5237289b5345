@@ -1,0 +1,4 @@
+# file: E:\AutoScholar\backend\app\utils\cache_manager.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.7, 0.8, 100, 1000, 1024, 3600, '*.json', '*.meta', '.cache', ':', 'REDIS_URL', 'USE_REDIS', '_', 'autoscholar', 'backend', 'backend/.cache', 'created_at', 'deleted', 'expire_at', 'false', 'file', 'file_cache', 'file_count', 'hit_rate', 'hits', 'hot_queries', 'key', 'last_access', 'max_local_keys', 'max_size_mb', 'misses', 'mode', 'redis', 'size', 'total_size_mb', 'tracked_keys', 'true', 'usage_percent', 'utf-8', 'writes']
